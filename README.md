@@ -1,50 +1,143 @@
-# Welcome to your Expo app 👋
+# 🛵 EcoBikes App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil para la gestión de comercio de motos eléctricas, desarrollada con **React Native + Expo** bajo arquitectura **MVVM** y backend en **Firebase**.
 
-## Get started
+> Proyecto académico desarrollado por el equipo **EcoBikes Team** — Instituto de Educación Superior Tecnológico IDAT.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 📱 Demo
 
-2. Start the app
+| Login | Catálogo | Detalle | Admin CRUD |
+|-------|----------|---------|------------|
+| Autenticación por roles | Productos en tiempo real | Vista de producto | Gestión de productos |
 
-   ```bash
-   npx expo start
-   ```
+> *Capturas disponibles próximamente.*
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🚀 Funcionalidades
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Usuario
+- 🔐 Autenticación con Firebase Auth (email/contraseña)
+- 📦 Catálogo de motos eléctricas en tiempo real (Firestore `onSnapshot`)
+- 🔍 Vista de detalle de producto con imagen y descripción
+- 🛒 Carrito de compras
+- 🔧 Solicitud de citas de mantenimiento
 
-## Get a fresh project
+### Administrador
+- ➕ Crear, editar y eliminar productos (CRUD completo)
+- 🖼️ Vista previa de imagen al editar producto
+- 👁️ Panel exclusivo con navegación por tabs condicional según rol
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## 🏗️ Arquitectura
+
+El proyecto sigue el patrón **MVVM (Model-View-ViewModel)**:
+
+```
+ECOBIKES-MVVM/
+├── src/
+│   ├── config/
+│   │   └── firebase.js           # Configuración Firebase
+│   ├── context/
+│   │   └── AppContext.js         # Contexto global de la app
+│   ├── models/
+│   │   ├── CatalogModel.js       # Modelo de productos
+│   │   └── ServiceModel.js       # Modelo de servicios
+│   ├── viewmodels/
+│   │   ├── useAuthViewModel.js   # Lógica de autenticación
+│   │   ├── useCatalogViewModel.js
+│   │   └── useServiceViewModel.js
+│   └── views/
+│       ├── LoginScreen.js        # Pantalla de inicio de sesión
+│       ├── CatalogScreen.js      # Catálogo de productos
+│       ├── DetailScreen.js       # Detalle de producto
+│       ├── CartScreen.js         # Carrito de compras
+│       └── ServiceScreen.js      # Solicitud de servicios
+├── App.js                        # Navegación y control de roles
+├── app.json
+└── package.json
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🛠️ Stack Tecnológico
 
-To learn more about developing your project with Expo, look at the following resources:
+| Tecnología | Uso |
+|---|---|
+| React Native | Framework de desarrollo móvil |
+| Expo | Entorno de desarrollo y build |
+| Firebase Auth | Autenticación de usuarios |
+| Cloud Firestore | Base de datos en tiempo real |
+| React Navigation | Navegación entre pantallas |
+| JavaScript (ES6+) | Lenguaje principal |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## ⚙️ Instalación y ejecución
 
-Join our community of developers creating universal apps.
+### Prerrequisitos
+- Node.js >= 18
+- Expo CLI: `npm install -g expo-cli`
+- Cuenta en [Firebase](https://firebase.google.com/) con proyecto creado
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Pasos
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/FranGuti14/EcoBikes-App.git
+cd EcoBikes-App
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar Firebase
+# Edita src/config/firebase.js con tus credenciales de Firebase
+
+# 4. Iniciar la app
+npx expo start
+```
+
+Escanea el QR con **Expo Go** en tu celular Android o iOS.
+
+---
+
+## 🔐 Roles de usuario
+
+| Rol | Acceso |
+|---|---|
+| **Usuario** | Catálogo, Detalle, Carrito, Servicios |
+| **Administrador** | Todo lo anterior + Panel de gestión de productos |
+
+El rol se asigna en Firestore bajo el campo `role` del documento de usuario.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Autenticación Firebase con roles
+- [x] Catálogo en tiempo real con Firestore
+- [x] CRUD de productos (admin)
+- [x] Vista previa de imagen al editar
+- [ ] Registro de nuevos usuarios
+- [ ] Perfil de usuario editable
+- [ ] Órdenes de compra guardadas en Firestore
+- [ ] Citas de mantenimiento guardadas en Firestore
+- [ ] Panel admin para gestión de órdenes y citas
+
+---
+
+## 👥 Equipo
+
+| Integrante | GitHub |
+|---|---|
+| Diego Franccesco Gutierrez Manco | [@FranGuti14](https://github.com/FranGuti14) |
+| Richard Araque | EcoBikes Team |
+
+---
+
+## 📄 Licencia
+
+Proyecto académico — Instituto de Educación Superior Tecnológico IDAT, Lima, Perú.
