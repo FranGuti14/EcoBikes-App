@@ -5,6 +5,11 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Variables de entorno para build no-interactivo
+ENV CI=1
+ENV EXPO_NO_TELEMETRY=1
+ENV NODE_ENV=production
+
 # Copiar dependencias primero (cache layer)
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
@@ -13,7 +18,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 
 # Exportar la app como web estática
-RUN npx expo export --platform web
+RUN npx expo export --platform web --output-dir dist
 
 # ─────────────────────────────────────────────
 #  STAGE 2 — Serve: Nginx sirve el build
