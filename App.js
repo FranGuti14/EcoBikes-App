@@ -14,6 +14,7 @@ import CatalogScreen from './src/views/CatalogScreen';
 import DetailScreen from './src/views/DetailScreen';
 import EditarProductoScreen from './src/views/EditarProductoScreen';
 import LoginScreen from './src/views/LoginScreen';
+import ProfileScreen from './src/views/ProfileScreen'; // <-- 1. Importamos la nueva pantalla
 import ServiceScreen from './src/views/ServiceScreen';
 
 const Tab = createBottomTabNavigator();
@@ -81,6 +82,12 @@ export default function App() {
               name="Main"
               component={MainTabs}
               options={{ headerShown: false }}
+            />
+            {/* 2. Agregamos la pantalla al Stack principal */}
+            <Stack.Screen 
+              name="Profile" 
+              component={ProfileScreen} 
+              options={{ title: 'Mi Perfil' }} 
             />
           </Stack.Navigator>
         </NavigationContainer>
