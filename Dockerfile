@@ -1,34 +1,14 @@
 # ─────────────────────────────────────────────
-#  STAGE 1 — Build: genera la web estática
+#  EcoBikes — Dockerfile
+#  El build de Expo se hace en GitHub Actions
+#  Este Dockerfile solo sirve los archivos con Nginx
 # ─────────────────────────────────────────────
-FROM node:18-alpine AS builder
+FROM nginx:stable-alpine
 
-WORKDIR /app
+# Copiar build generado por Expo (carpeta dist)
+COPY dist/ /usr/share/nginx/html
 
-# Variables de entorno para build no-interactivo
-ENV CI=1
-ENV EXPO_NO_TELEMETRY=1
-ENV NODE_ENV=production
-
-# Copiar dependencias primero (cache layer)
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
-
-# Copiar el resto del proyecto
-COPY . .
-
-# Exportar la app como web estática
-RUN npx expo export --platform web --output-dir dist
-
-# ─────────────────────────────────────────────
-#  STAGE 2 — Serve: Nginx sirve el build
-# ─────────────────────────────────────────────
-FROM nginx:stable-alpine AS production
-
-# Copiar build generado por Expo
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Configuración básica de Nginx para SPA
+# Configuración de Nginx para SPA (React/Expo web)
 RUN echo 'server { \
     listen 80; \
     root /usr/share/nginx/html; \

@@ -10,30 +10,25 @@
 #  │       ↓ health check OK                                      │
 #  │  BLUE  (main)    ──► Firebase Hosting (producción)           │
 #  └──────────────────────────────────────────────────────────────┘
-#
-#  SECRETS requeridos en GitHub → Settings → Secrets:
-#    FIREBASE_TOKEN  →  obtenido con: firebase login:ci
-# ══════════════════════════════════════════════════════════════════
 
 name: EcoBikes CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main        # BLUE  → producción
-      - develop     # GREEN → staging / preview
+      - main
+      - develop
   pull_request:
     branches:
       - main
 
 env:
   NODE_VERSION: "18"
-  DOCKER_IMAGE: ecobikes-app
 
 jobs:
 
   # ────────────────────────────────────────────────────────────────
-  #  JOB 1: CI — Lint + Build Docker
+  #  JOB 1: CI — Lint + Build Expo + Build Docker
   # ────────────────────────────────────────────────────────────────
   ci-build:
     name: "🔍 CI — Lint y Build"
@@ -54,29 +49,33 @@ jobs:
 
       - name: "🔎 Ejecutar Lint (Quality Gate)"
         run: npm run lint
-        continue-on-error: false   # Pipeline falla si hay errores de lint
+        continue-on-error: false
+
+      - name: "🏗️ Build web estática (Expo)"
+        run: npx expo export --platform web
+        env:
+          CI: false
+          EXPO_NO_TELEMETRY: 1
 
       - name: "🐳 Build imagen Docker"
         run: |
-          docker build -t ${{ env.DOCKER_IMAGE }}:${{ github.sha }} .
-          echo "✅ Imagen construida: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}"
+          docker build -t ecobikes-app:${{ github.sha }} .
+          echo "✅ Imagen construida: ecobikes-app:${{ github.sha }}"
 
       - name: "🏥 Health Check del contenedor Docker"
         run: |
-          # Levantar contenedor
-          docker run -d --name ecobikes-test -p 8080:80 \
-            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-
-          # Esperar que arranque
-          sleep 10
-
-          # Verificar que responde
+          docker run -d --name ecobikes-test -p 8080:80 ecobikes-app:${{ github.sha }}
+          sleep 8
           chmod +x scripts/health-check.sh
           ./scripts/health-check.sh http://localhost:8080
-
-          # Limpiar
           docker stop ecobikes-test
           docker rm ecobikes-test
+
+      - name: "📤 Guardar build para deploy"
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-dist
+          path: dist/
 
   # ────────────────────────────────────────────────────────────────
   #  JOB 2: GREEN — Deploy a Firebase Preview (rama develop)
@@ -91,17 +90,11 @@ jobs:
       - name: "📥 Checkout del código"
         uses: actions/checkout@v4
 
-      - name: "⚙️ Configurar Node.js"
-        uses: actions/setup-node@v4
+      - name: "📥 Descargar build"
+        uses: actions/download-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      - name: "📦 Instalar dependencias"
-        run: npm ci --legacy-peer-deps
-
-      - name: "🏗️ Build web estática (Expo)"
-        run: npx expo export --platform web
+          name: expo-dist
+          path: dist/
 
       - name: "🟢 Deploy a Firebase Preview Channel (GREEN)"
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -110,15 +103,12 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN }}
           channelId: green-staging
           expires: 7d
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
 
-      - name: "🏥 Health Check del entorno GREEN"
+      - name: "✅ Entorno GREEN desplegado"
         run: |
-          chmod +x scripts/health-check.sh
-          # La URL del preview channel la imprime el paso anterior
-          # Este check valida que el canal responde con HTTP 200
-          echo "✅ Entorno GREEN desplegado y validado"
+          echo "🟢 EcoBikes desplegado en staging (entorno GREEN)"
+          echo "🕐 Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "📌 Commit: ${{ github.sha }}"
 
   # ────────────────────────────────────────────────────────────────
   #  JOB 3: BLUE — Deploy a Producción (rama main)
@@ -133,17 +123,11 @@ jobs:
       - name: "📥 Checkout del código"
         uses: actions/checkout@v4
 
-      - name: "⚙️ Configurar Node.js"
-        uses: actions/setup-node@v4
+      - name: "📥 Descargar build"
+        uses: actions/download-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      - name: "📦 Instalar dependencias"
-        run: npm ci --legacy-peer-deps
-
-      - name: "🏗️ Build web estática (Expo)"
-        run: npx expo export --platform web
+          name: expo-dist
+          path: dist/
 
       - name: "🔵 Deploy a Firebase Hosting Producción (BLUE)"
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -151,8 +135,6 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN }}
           channelId: live
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
 
       - name: "✅ Confirmación de deploy en producción"
         run: |
@@ -160,8 +142,3 @@ jobs:
           echo "🕐 Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           echo "📌 Commit: ${{ github.sha }}"
           echo "👤 Actor: ${{ github.actor }}"
-
-      - name: "🏥 Health Check final de producción"
-        run: |
-          chmod +x scripts/health-check.sh
-          echo "✅ Health check de producción completado"
