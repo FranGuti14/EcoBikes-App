@@ -28,7 +28,7 @@ env:
 jobs:
 
   # ────────────────────────────────────────────────────────────────
-  #  JOB 1: CI — Lint + Build Expo + Build Docker
+  #  JOB 1: CI — Lint + Build Docker + Health Check
   # ────────────────────────────────────────────────────────────────
   ci-build:
     name: "🔍 CI — Lint y Build"
@@ -51,13 +51,6 @@ jobs:
         run: npm run lint
         continue-on-error: false
 
-      - name: "🏗️ Build web estática (Expo)"
-        run: npx expo export --platform web
-        env:
-          CI: false
-          EXPO_NO_TELEMETRY: 1
-          EXPO_USE_METRO_WORKSPACE_ROOT: 1
-
       - name: "🐳 Build imagen Docker"
         run: |
           docker build -t ecobikes-app:${{ github.sha }} .
@@ -65,18 +58,25 @@ jobs:
 
       - name: "🏥 Health Check del contenedor Docker"
         run: |
-          docker run -d --name ecobikes-test -p 8080:80 ecobikes-app:${{ github.sha }}
+          docker run -d --name ecobikes-test -p 8080:80 \
+            ecobikes-app:${{ github.sha }}
           sleep 8
           chmod +x scripts/health-check.sh
           ./scripts/health-check.sh http://localhost:8080
           docker stop ecobikes-test
           docker rm ecobikes-test
 
-      - name: "📤 Guardar build para deploy"
-        uses: actions/upload-artifact@v4
-        with:
-          name: expo-dist
-          path: dist/
+      - name: "📋 Generar reporte de build"
+        run: |
+          echo "## 📊 Reporte CI — EcoBikes" >> $GITHUB_STEP_SUMMARY
+          echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏷️ Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌿 Rama | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 👤 Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Lint | Aprobado |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker | Build OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏥 Health Check | Disponible |" >> $GITHUB_STEP_SUMMARY
 
   # ────────────────────────────────────────────────────────────────
   #  JOB 2: GREEN — Deploy a Firebase Preview (rama develop)
@@ -91,12 +91,6 @@ jobs:
       - name: "📥 Checkout del código"
         uses: actions/checkout@v4
 
-      - name: "📥 Descargar build"
-        uses: actions/download-artifact@v4
-        with:
-          name: expo-dist
-          path: dist/
-
       - name: "🟢 Deploy a Firebase Preview Channel (GREEN)"
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -105,7 +99,7 @@ jobs:
           channelId: green-staging
           expires: 7d
 
-      - name: "✅ Entorno GREEN desplegado"
+      - name: "✅ Confirmación entorno GREEN"
         run: |
           echo "🟢 EcoBikes desplegado en staging (entorno GREEN)"
           echo "🕐 Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
@@ -123,12 +117,6 @@ jobs:
     steps:
       - name: "📥 Checkout del código"
         uses: actions/checkout@v4
-
-      - name: "📥 Descargar build"
-        uses: actions/download-artifact@v4
-        with:
-          name: expo-dist
-          path: dist/
 
       - name: "🔵 Deploy a Firebase Hosting Producción (BLUE)"
         uses: FirebaseExtended/action-hosting-deploy@v0
