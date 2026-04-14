@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useContext } from 'react';
-import { Text, View } from 'react-native'; // Importamos View y Text para la pantalla temporal
 import { Provider as PaperProvider } from 'react-native-paper';
 
 import { AppContext, AppProvider } from './src/context/AppContext';
@@ -13,18 +12,10 @@ import AdminScreen from './src/views/AdminScreen';
 import CartScreen from './src/views/CartScreen';
 import CatalogScreen from './src/views/CatalogScreen';
 import DetailScreen from './src/views/DetailScreen';
+import EditarProductoScreen from './src/views/EditarProductoScreen'; // RE-CONECTADO
 import LoginScreen from './src/views/LoginScreen';
 import ProfileScreen from './src/views/ProfileScreen';
 import ServiceScreen from './src/views/ServiceScreen';
-
-// --- PANTALLA FANTASMA PARA EVITAR EL ERROR ---
-function PantallaEdicionTemporal() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>La edición está en otro archivo.</Text>
-    </View>
-  );
-}
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -44,8 +35,10 @@ function AdminStack() {
       <Stack.Screen name="AdminHome" component={AdminScreen} options={{ title: 'Gestionar Productos' }} />
       <Stack.Screen
         name="EditarProducto"
-        component={PantallaEdicionTemporal} // Usamos la fantasma en lugar de importar un archivo
-        options={{ title: 'Editar Producto' }}
+        component={EditarProductoScreen} // Usamos la pantalla real
+        options={({ route }) => ({
+          title: route.params?.producto ? 'Editar Producto' : 'Nuevo Producto'
+        })}
       />
     </Stack.Navigator>
   );
