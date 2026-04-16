@@ -106,15 +106,7 @@ Escanea el QR con **Expo Go** en tu celular Android o iOS.
 
 ## 🔐 Roles de usuario
 
-| Rol | Acceso |
-|---|---|
-| **Usuario** | Catálogo, Detalle, Carrito, Servicios |
-| **Administrador** | Todo lo anterior + Panel de gestión de productos |
-
-El rol se asigna en Firestore bajo el campo `role` del documento de usuario.
-
----
-
+ -Diego
 ## 🗺️ Roadmap
 
 - [x] Autenticación Firebase con roles
