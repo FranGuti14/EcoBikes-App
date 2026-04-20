@@ -113,11 +113,11 @@ Escanea el QR con **Expo Go** en tu celular Android o iOS.
 - [x] Catálogo en tiempo real con Firestore
 - [x] CRUD de productos (admin)
 - [x] Vista previa de imagen al editar
-- [ ] Registro de nuevos usuarios
-- [ ] Perfil de usuario editable
-- [ ] Órdenes de compra guardadas en Firestore
+- [x] Registro de nuevos usuarios
+- [x] Perfil de usuario editable
+- [x] Órdenes de compra guardadas en Firestore
 - [ ] Citas de mantenimiento guardadas en Firestore
-- [ ] Panel admin para gestión de órdenes y citas
+- [x] Panel admin para gestión de órdenes y citas
 
 ---
 
@@ -126,7 +126,6 @@ Escanea el QR con **Expo Go** en tu celular Android o iOS.
 | Integrante | GitHub |
 |---|---|
 | Diego Franccesco Gutierrez Manco | [@FranGuti14](https://github.com/FranGuti14) |
-| Richard Araque | EcoBikes Team |
 
 ---
 
