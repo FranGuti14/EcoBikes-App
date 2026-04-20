@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation }) {
               onPress={() => setModo('login')}
             >
               <Text style={[styles.tabText, modo === 'login' && styles.tabTextActivo]}>
-                Sign In
+                Iniciar Sesión
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -59,7 +59,7 @@ export default function LoginScreen({ navigation }) {
               onPress={() => setModo('registro')}
             >
               <Text style={[styles.tabText, modo === 'registro' && styles.tabTextActivo]}>
-                Create Account
+                Crear Cuenta
               </Text>
             </TouchableOpacity>
           </View>
@@ -67,7 +67,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.form}>
             {modo === 'registro' && (
               <>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={styles.label}>Nombre</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Alex Green"
@@ -79,7 +79,7 @@ export default function LoginScreen({ navigation }) {
               </>
             )}
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Correo</Text>
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
@@ -90,7 +90,7 @@ export default function LoginScreen({ navigation }) {
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>Contraseña</Text>
             <TextInput
               style={styles.input}
               placeholder={modo === 'registro' ? 'Min. 6 characters' : '••••••••'}
@@ -109,7 +109,7 @@ export default function LoginScreen({ navigation }) {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.btnPrincipalText}>
-                  {modo === 'login' ? 'Sign In →' : 'Create Account →'}
+                  {modo === 'login' ? 'Iniciar Sesión →' : 'Crear Cuenta →'}
                 </Text>
               )}
             </TouchableOpacity>
@@ -120,8 +120,8 @@ export default function LoginScreen({ navigation }) {
             >
               <Text style={styles.linkCambioText}>
                 {modo === 'login'
-                  ? "Don't have an account? Sign up"
-                  : 'Already have an account? Sign in'}
+                  ? "¿No tienes una cuenta? Regístrate"
+                  : '¿Ya tienes una cuenta? Inicia Sesión'}
               </Text>
             </TouchableOpacity>
           </View>
