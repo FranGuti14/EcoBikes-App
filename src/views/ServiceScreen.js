@@ -19,9 +19,8 @@ export default function UbicanosScreen() {
   });
   const [loading, setLoading] = useState(false);
 
-  // Función matemática para calcular distancia entre dos coordenadas
   const calcularDistancia = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radio de la tierra en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -39,14 +38,11 @@ export default function UbicanosScreen() {
       setLoading(false);
       return;
     }
-
     let location = await Location.getCurrentPositionAsync({});
     const myLat = location.coords.latitude;
     const myLng = location.coords.longitude;
-
     let sedeMasCercana = null;
     let distanciaMinima = Infinity;
-
     sedes.forEach(sede => {
       const dist = calcularDistancia(myLat, myLng, sede.lat, sede.lng);
       if (dist < distanciaMinima) {
@@ -54,21 +50,16 @@ export default function UbicanosScreen() {
         sedeMasCercana = sede;
       }
     });
-
     if (sedeMasCercana) {
-      setMapRegion({
-        latitude: sedeMasCercana.lat,
-        longitude: sedeMasCercana.lng,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-      Alert.alert('Sede más cercana', `Te recomendamos ir a la sede de ${sedeMasCercana.distrito}, a ${distanciaMinima.toFixed(1)} km de distancia.`);
+      setMapRegion({ latitude: sedeMasCercana.lat, longitude: sedeMasCercana.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+      Alert.alert('Nearest Station', `We recommend going to ${sedeMasCercana.distrito}, ${distanciaMinima.toFixed(1)} km away.`);
     }
     setLoading(false);
   };
 
   return (
     <View style={styles.container}>
+      {/* Map Section */}
       <View style={styles.mapContainer}>
         <MapView style={styles.map} region={mapRegion}>
           {sedes.map(sede => (
@@ -77,25 +68,56 @@ export default function UbicanosScreen() {
               coordinate={{ latitude: sede.lat, longitude: sede.lng }}
               title={`EcoBikes ${sede.distrito}`}
               description={sede.direccion}
-              pinColor="#27ae60"
+              pinColor="#16A34A"
             />
           ))}
         </MapView>
-        <TouchableOpacity style={styles.btnCercana} onPress={encontrarSedeCercana} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff"/> : <Text style={styles.btnText}>📍 Encontrar sede más cercana</Text>}
+
+        {/* Overlay header */}
+        <View style={styles.mapOverlayHeader}>
+          <Text style={styles.mapOverlayTitle}>🗺️ Find a Station</Text>
+          <Text style={styles.mapOverlaySub}>{sedes.length} locations near you</Text>
+        </View>
+
+        {/* Find nearest button */}
+        <TouchableOpacity
+          style={styles.nearestBtn}
+          onPress={encontrarSedeCercana}
+          disabled={loading}
+        >
+          {loading
+            ? <ActivityIndicator color="#fff" size="small" />
+            : <Text style={styles.nearestBtnText}>📍 Find Nearest Station</Text>
+          }
         </TouchableOpacity>
+      </View>
+
+      {/* Stations List */}
+      <View style={styles.listHeader}>
+        <Text style={styles.listHeaderTitle}>Our Stations</Text>
+        <Text style={styles.listHeaderCount}>{sedes.length} total</Text>
       </View>
 
       <FlatList
         data={sedes}
         keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.iconContainer}><Ionicons name="location" size={30} color="#27ae60" /></View>
-            <View style={styles.info}>
-              <Text style={styles.distrito}>{item.distrito}</Text>
-              <Text style={styles.direccion}>{item.direccion}</Text>
-              <Text style={styles.tel}><Ionicons name="call-outline" size={14}/> {item.tel}</Text>
+          <View style={styles.stationCard}>
+            <View style={styles.stationIconWrap}>
+              <Ionicons name="location" size={22} color="#16A34A" />
+            </View>
+            <View style={styles.stationInfo}>
+              <Text style={styles.stationName}>EcoBikes {item.distrito}</Text>
+              <Text style={styles.stationAddress}>{item.direccion}</Text>
+              <View style={styles.stationPhone}>
+                <Ionicons name="call-outline" size={12} color="#6B7280" />
+                <Text style={styles.stationPhoneText}> {item.tel}</Text>
+              </View>
+            </View>
+            <View style={styles.availBadge}>
+              <View style={styles.availDot} />
+              <Text style={styles.availText}>Open</Text>
             </View>
           </View>
         )}
@@ -105,14 +127,80 @@ export default function UbicanosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  mapContainer: { height: 300, width: '100%', position: 'relative' },
+  container: { flex: 1, backgroundColor: '#F0FDF4' },
+  mapContainer: { height: 320, position: 'relative' },
   map: { ...StyleSheet.absoluteFillObject },
-  btnCercana: { position: 'absolute', bottom: 15, alignSelf: 'center', backgroundColor: '#2c3e50', padding: 12, borderRadius: 8, elevation: 5 },
-  btnText: { color: '#fff', fontWeight: 'bold' },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 15, marginHorizontal: 20, marginTop: 15, elevation: 2 },
-  iconContainer: { justifyContent: 'center', marginRight: 15 },
-  distrito: { fontSize: 18, fontWeight: 'bold', color: '#27ae60' },
-  direccion: { fontSize: 14, color: '#7f8c8d', marginVertical: 4 },
-  tel: { fontSize: 13, color: '#34495e', fontWeight: '500' }
+
+  mapOverlayHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(13,51,32,0.85)',
+    paddingTop: 52,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
+  },
+  mapOverlayTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF' },
+  mapOverlaySub: { fontSize: 13, color: '#86EFAC', marginTop: 2 },
+
+  nearestBtn: {
+    position: 'absolute',
+    bottom: 16,
+    alignSelf: 'center',
+    backgroundColor: '#16A34A',
+    paddingHorizontal: 24,
+    paddingVertical: 13,
+    borderRadius: 30,
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  nearestBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  listHeaderTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
+  listHeaderCount: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
+  listContent: { paddingHorizontal: 16, paddingBottom: 30 },
+
+  stationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    shadowColor: '#0D3320',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  stationIconWrap: {
+    width: 44,
+    height: 44,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  stationInfo: { flex: 1 },
+  stationName: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 2 },
+  stationAddress: { fontSize: 12, color: '#6B7280', marginBottom: 4, lineHeight: 16 },
+  stationPhone: { flexDirection: 'row', alignItems: 'center' },
+  stationPhoneText: { fontSize: 12, color: '#6B7280' },
+  availBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0FDF4', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  availDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#16A34A', marginRight: 5 },
+  availText: { fontSize: 11, fontWeight: '700', color: '#16A34A' },
 });

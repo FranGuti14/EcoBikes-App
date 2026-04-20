@@ -8,29 +8,25 @@ import { AppContext } from '../context/AppContext';
 
 export default function UserMenu({ navigation }) {
   const [visible, setVisible] = useState(false);
-  const [displayName, setDisplayName] = useState('Cargando...');
+  const [displayName, setDisplayName] = useState('Loading...');
   const { userRole, setUserRole } = useContext(AppContext);
 
-  // Busca el nombre del usuario cada vez que se abre el menú
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
         try {
           const docRef = doc(db, 'users', auth.currentUser.uid);
           const docSnap = await getDoc(docRef);
-          
           if (docSnap.exists() && docSnap.data().nombre) {
             setDisplayName(docSnap.data().nombre);
           } else {
-            // Fallback: Si no tiene nombre, muestra su email (o un texto por defecto)
-            setDisplayName(auth.currentUser.email || 'Usuario');
+            setDisplayName(auth.currentUser.email || 'User');
           }
-        } catch (error) {
-          setDisplayName('Usuario');
+        } catch {
+          setDisplayName('User');
         }
       }
     };
-    
     if (visible) fetchUserData();
   }, [visible]);
 
@@ -49,7 +45,11 @@ export default function UserMenu({ navigation }) {
   return (
     <View>
       <TouchableOpacity onPress={() => setVisible(true)} style={styles.iconButton}>
-        <Ionicons name="person-circle-outline" size={28} color="#2c3e50" />
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>
+            {(displayName && displayName !== 'Loading...') ? displayName.charAt(0).toUpperCase() : '?'}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <Modal transparent visible={visible} animationType="fade">
@@ -57,26 +57,39 @@ export default function UserMenu({ navigation }) {
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
               <View style={styles.menu}>
-                
-                {/* --- AHORA MUESTRA EL NOMBRE O CORREO --- */}
-                <Text style={styles.role}>
-                  {userRole === 'admin' ? '👑 ' : '👤 '} {displayName}
-                </Text>
-                
+                <View style={styles.menuHeader}>
+                  <View style={styles.menuAvatar}>
+                    <Text style={styles.menuAvatarText}>
+                      {displayName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={styles.menuName} numberOfLines={1}>{displayName}</Text>
+                    <Text style={styles.menuRole}>
+                      {userRole === 'admin' ? '👑 Administrator' : '🌿 Eco Rider'}
+                    </Text>
+                  </View>
+                </View>
+
                 <View style={styles.divider} />
-                
+
                 <TouchableOpacity style={styles.menuItem} onPress={goToProfile}>
-                  <Ionicons name="person-outline" size={20} color="#34495e" />
-                  <Text style={styles.menuText}>Mi Perfil</Text>
+                  <View style={styles.menuItemIcon}>
+                    <Ionicons name="person-outline" size={18} color="#16A34A" />
+                  </View>
+                  <Text style={styles.menuItemText}>My Profile</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
 
                 <View style={styles.divider} />
 
                 <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-                  <Ionicons name="log-out-outline" size={20} color="#e74c3c" />
-                  <Text style={styles.logoutText}>Cerrar sesión</Text>
+                  <View style={[styles.menuItemIcon, styles.logoutIcon]}>
+                    <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+                  </View>
+                  <Text style={styles.logoutText}>Sign Out</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
-
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -87,17 +100,65 @@ export default function UserMenu({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  iconButton: { marginRight: 15 },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
-  menu: {
-    position: 'absolute', top: 90, right: 15,
-    backgroundColor: '#fff', borderRadius: 10,
-    padding: 15, minWidth: 180,
-    shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, elevation: 5,
+  iconButton: { marginRight: 14 },
+  avatarCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#4ADE80',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  role: { fontSize: 14, fontWeight: 'bold', color: '#2c3e50', marginBottom: 8 },
-  divider: { height: 1, backgroundColor: '#eee', marginVertical: 8 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5 },
-  menuText: { color: '#34495e', fontWeight: 'bold', fontSize: 15 },
-  logoutText: { color: '#e74c3c', fontWeight: 'bold', fontSize: 15 },
+  avatarText: { color: '#0D3320', fontWeight: '800', fontSize: 15 },
+
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  menu: {
+    position: 'absolute',
+    top: 88,
+    right: 14,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    minWidth: 220,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap: 12,
+  },
+  menuAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#0D3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuAvatarText: { color: '#4ADE80', fontWeight: '800', fontSize: 18 },
+  menuName: { fontSize: 14, fontWeight: '700', color: '#111827', maxWidth: 130 },
+  menuRole: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  divider: { height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 8 },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap: 10,
+  },
+  menuItemIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#F0FDF4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutIcon: { backgroundColor: '#FEF2F2' },
+  menuItemText: { flex: 1, color: '#374151', fontWeight: '600', fontSize: 14 },
+  logoutText: { flex: 1, color: '#DC2626', fontWeight: '600', fontSize: 14 },
 });
