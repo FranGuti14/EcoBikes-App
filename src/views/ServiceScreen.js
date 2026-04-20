@@ -52,7 +52,7 @@ export default function UbicanosScreen() {
     });
     if (sedeMasCercana) {
       setMapRegion({ latitude: sedeMasCercana.lat, longitude: sedeMasCercana.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 });
-      Alert.alert('Nearest Station', `We recommend going to ${sedeMasCercana.distrito}, ${distanciaMinima.toFixed(1)} km away.`);
+      Alert.alert('Estación más Cercana', `Te recomendamos ir a  ${sedeMasCercana.distrito}, ${distanciaMinima.toFixed(1)} km de distancia.`);
     }
     setLoading(false);
   };
@@ -75,8 +75,8 @@ export default function UbicanosScreen() {
 
         {/* Overlay header */}
         <View style={styles.mapOverlayHeader}>
-          <Text style={styles.mapOverlayTitle}>🗺️ Find a Station</Text>
-          <Text style={styles.mapOverlaySub}>{sedes.length} locations near you</Text>
+          <Text style={styles.mapOverlayTitle}>🗺️ Encuentra una estación</Text>
+          <Text style={styles.mapOverlaySub}>{sedes.length} locales cerca a ti</Text>
         </View>
 
         {/* Find nearest button */}
@@ -87,14 +87,14 @@ export default function UbicanosScreen() {
         >
           {loading
             ? <ActivityIndicator color="#fff" size="small" />
-            : <Text style={styles.nearestBtnText}>📍 Find Nearest Station</Text>
+            : <Text style={styles.nearestBtnText}>📍 Encuentra la estación más cercana a ti</Text>
           }
         </TouchableOpacity>
       </View>
 
       {/* Stations List */}
       <View style={styles.listHeader}>
-        <Text style={styles.listHeaderTitle}>Our Stations</Text>
+        <Text style={styles.listHeaderTitle}>Nuestros Locales</Text>
         <Text style={styles.listHeaderCount}>{sedes.length} total</Text>
       </View>
 

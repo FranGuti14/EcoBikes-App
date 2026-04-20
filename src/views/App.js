@@ -24,16 +24,7 @@ function CatalogStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="CatálogoPrincipal" component={CatalogScreen} options={{ headerShown: false }} />
-      <Stack.Screen
-        name="Detalles"
-        component={DetailScreen}
-        options={{
-          title: 'Bike Details',
-          headerStyle: { backgroundColor: '#0D3320' },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: { fontWeight: '700' },
-        }}
-      />
+      <Stack.Screen name="Detalles" component={DetailScreen} options={{ title: 'Detalles del Producto' }} />
     </Stack.Navigator>
   );
 }
@@ -41,19 +32,12 @@ function CatalogStack() {
 function AdminStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="AdminHome"
-        component={AdminScreen}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="AdminHome" component={AdminScreen} options={{ title: 'Gestionar Productos' }} />
       <Stack.Screen
         name="EditarProducto"
         component={EditarProductoScreen}
         options={({ route }) => ({
-          title: route.params?.producto ? 'Edit Product' : 'New Product',
-          headerStyle: { backgroundColor: '#0D3320' },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: { fontWeight: '700' },
+          title: route.params?.producto ? 'Editar Producto' : 'Nuevo Producto'
         })}
       />
     </Stack.Navigator>
@@ -61,63 +45,41 @@ function AdminStack() {
 }
 
 function MainTabs({ navigation }) {
-  const { userRole } = useContext(AppContext);
+  const { userRole, cart } = useContext(AppContext);
+
+  // Calcula el total de unidades de manera segura sumando las cantidades
+  const totalItems = cart?.reduce((sum, item) => sum + (item.cantidad || 0), 0) || 0;
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size, focused }) => {
-          let iconName = focused ? 'bicycle' : 'bicycle-outline';
-          if (route.name === 'Ubícanos') iconName = focused ? 'map' : 'map-outline';
-          if (route.name === 'Carrito') iconName = focused ? 'cart' : 'cart-outline';
-          if (route.name === 'Admin') iconName = focused ? 'settings' : 'settings-outline';
+        tabBarIcon: ({ color, size }) => {
+          let iconName = 'bicycle';
+          if (route.name === 'Ubícanos') iconName = 'map';
+          if (route.name === 'Carrito') iconName = 'cart';
+          if (route.name === 'Admin') iconName = 'settings';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#16A34A',
-        tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 0,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.06,
-          shadowRadius: 12,
-          elevation: 10,
-          height: 64,
-          paddingBottom: 10,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        headerStyle: { backgroundColor: '#0D3320' },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: { fontWeight: '700' },
+        tabBarInactiveTintColor: 'gray',
+        headerTintColor: '#0D3320',
         headerRight: () => <UserMenu navigation={navigation} />,
       })}
     >
-      <Tab.Screen
-        name="Catálogo"
-        component={CatalogStack}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name="Ubícanos"
-        component={ServiceScreen}
-        options={{ headerShown: false }}
-      />
+      <Tab.Screen name="Catálogo" component={CatalogStack} />
+      <Tab.Screen name="Ubícanos" component={ServiceScreen} />
       {userRole === 'user' ? (
-        <Tab.Screen
-          name="Carrito"
-          component={CartScreen}
-          options={{ headerShown: false }}
+        <Tab.Screen 
+          name="Carrito" 
+          component={CartScreen} 
+          options={{
+            // React Navigation requiere pasar "null" para ocultar la burbuja si es 0
+            tabBarBadge: totalItems > 0 ? totalItems : null, 
+            tabBarBadgeStyle: { backgroundColor: '#16A34A', color: 'white' }
+          }}
         />
       ) : null}
-      {userRole === 'admin' ? (
-        <Tab.Screen
-          name="Admin"
-          component={AdminStack}
-          options={{ headerShown: false }}
-        />
-      ) : null}
+      {userRole === 'admin' ? <Tab.Screen name="Admin" component={AdminStack} /> : null}
     </Tab.Navigator>
   );
 }
@@ -134,15 +96,10 @@ export default function App() {
               component={MainTabs}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{
-                title: 'My Profile',
-                headerStyle: { backgroundColor: '#0D3320' },
-                headerTintColor: '#FFFFFF',
-                headerTitleStyle: { fontWeight: '700' },
-              }}
+            <Stack.Screen 
+              name="Profile" 
+              component={ProfileScreen} 
+              options={{ title: 'Mi Perfil' }} 
             />
           </Stack.Navigator>
         </NavigationContainer>
